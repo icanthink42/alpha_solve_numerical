@@ -1,0 +1,15 @@
+[plugin]
+id = "icanthink.alpha_solve_numerical"
+name = "Alpha Solve Numerical"
+version = "1.0.0"
+python_libraries = ["numpy", "scipy"]
+
+[[functions]]
+functionName = "solve_numerical"
+
+[[functions]]
+functionName = "evaluate_numerical"
+
+[[functions]]
+functionName = "find_roots"
+
