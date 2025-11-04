@@ -129,42 +129,43 @@ def solve_numerical(input_data: CellFunctionInput) -> CellFunctionResult:
                 # Convert to numerical function
                 func = lambdify(var, substituted_expr, modules=['numpy'])
 
-                # Try to find solution
-                try:
-                    # Try fsolve with initial guess 0
-                    solution = fsolve(func, 0.0)[0]
-
-                    # Verify the solution
-                    if abs(func(solution)) < 1e-6:
-                        # Round to reasonable precision
-                        solution_rounded = round(solution, 10)
-                        all_solutions.add(solution_rounded)
-                except:
-                    # If fsolve fails, try searching in a range
+                # Try multiple initial guesses to find different roots
+                initial_guesses = [-100, -10, -1, 0, 1, 10, 100]
+                for guess in initial_guesses:
                     try:
-                        solution = brentq(func, -1000, 1000)
-                        solution_rounded = round(solution, 10)
-                        all_solutions.add(solution_rounded)
+                        solution = fsolve(func, guess)[0]
+
+                        # Verify the solution
+                        if abs(func(solution)) < 1e-6:
+                            # Round to reasonable precision
+                            solution_rounded = round(solution, 10)
+                            all_solutions.add(solution_rounded)
                     except:
                         pass
         else:
             # No context variables to substitute, solve directly
             func = lambdify(var, equation_expr, modules=['numpy'])
 
-            try:
-                # Try fsolve with initial guess 0
-                solution = fsolve(func, 0.0)[0]
+            # Try multiple initial guesses to find different roots
+            initial_guesses = [-100, -10, -1, 0, 1, 10, 100]
+            for guess in initial_guesses:
+                try:
+                    solution = fsolve(func, guess)[0]
 
-                # Verify the solution
-                if abs(func(solution)) < 1e-6:
-                    solution_rounded = round(solution, 10)
-                    all_solutions.add(solution_rounded)
-            except:
-                # If fsolve fails, try searching in a range
+                    # Verify the solution
+                    if abs(func(solution)) < 1e-6:
+                        solution_rounded = round(solution, 10)
+                        all_solutions.add(solution_rounded)
+                except:
+                    pass
+
+            # Also try interval-based method if we haven't found solutions yet
+            if not all_solutions:
                 try:
                     solution = brentq(func, -1000, 1000)
                     solution_rounded = round(solution, 10)
-                    all_solutions.add(solution_rounded)
+                    if abs(func(solution_rounded)) < 1e-6:
+                        all_solutions.add(solution_rounded)
                 except:
                     pass
 
