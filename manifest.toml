@@ -10,6 +10,3 @@ functionName = "solve_numerical"
 [[functions]]
 functionName = "evaluate_numerical"
 
-[[functions]]
-functionName = "find_roots"
-
