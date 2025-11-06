@@ -33,7 +33,7 @@ def evaluate_num_functions(input_data: ProcMacroInput) -> ProcMacroResult:
 
     # Pattern to match num(...) where ... can contain nested parentheses
     # We'll use a simpler approach: match num( and find the closing )
-    pattern = r'\\?num\s*\('
+    pattern = r'\\?n\s*\('
 
     while True:
         match = re.search(pattern, modified_latex)
