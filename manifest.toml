@@ -10,3 +10,8 @@ functionName = "solve_numerical"
 [[functions]]
 functionName = "evaluate_numerical"
 
+# Proc macro that evaluates num() functions in LaTeX
+[[proc_macros]]
+functionName = "evaluate_num_functions"
+metaFunctionName = "meta_evaluate_num_functions"
+
