@@ -31,33 +31,58 @@ def evaluate_num_functions(input_data: ProcMacroInput) -> ProcMacroResult:
     """
     modified_latex = input_data.latex
 
-    # Pattern to match num(...) where ... can contain nested parentheses
-    # We'll use a simpler approach: match num( and find the closing )
-    pattern = r'\\?n\s*\('
+    # Pattern to match n(...) or n\left(...\right)
+    # Match n followed by optional whitespace, then ( or \left(
+    pattern = r'\\?n\s*(?:\\left)?\('
 
     while True:
         match = re.search(pattern, modified_latex)
         if not match:
             break
 
-        # Find the matching closing parenthesis
+        # Check if we matched \left(
+        has_left = '\\left' in match.group()
+
+        # Find the matching closing parenthesis or \right)
         start_pos = match.end()
         paren_count = 1
         end_pos = start_pos
 
-        while end_pos < len(modified_latex) and paren_count > 0:
-            if modified_latex[end_pos] == '(':
+        # Look for closing parenthesis or \right)
+        i = start_pos
+        while i < len(modified_latex) and paren_count > 0:
+            # Check for \left(
+            if modified_latex[i:i+6] == '\\left(':
                 paren_count += 1
-            elif modified_latex[end_pos] == ')':
+                i += 6
+            # Check for \right)
+            elif modified_latex[i:i+7] == '\\right)':
                 paren_count -= 1
-            end_pos += 1
+                i += 7
+            # Check for regular parentheses
+            elif modified_latex[i] == '(':
+                paren_count += 1
+                i += 1
+            elif modified_latex[i] == ')':
+                paren_count -= 1
+                i += 1
+            else:
+                i += 1
+
+        end_pos = i
 
         if paren_count != 0:
             # Unmatched parentheses, skip this one
             break
 
-        # Extract the expression inside num(...)
-        expr_latex = modified_latex[start_pos:end_pos-1].strip()
+        # Extract the expression inside n(...)
+        expr_latex = modified_latex[start_pos:end_pos].strip()
+
+        # Remove trailing \right) if present
+        if expr_latex.endswith('\\right)'):
+            expr_latex = expr_latex[:-7].strip()
+        elif expr_latex.endswith(')'):
+            expr_latex = expr_latex[:-1].strip()
 
         try:
             # Parse the LaTeX expression
@@ -123,12 +148,13 @@ def meta_evaluate_num_functions(input_data: ProcMacroInput) -> MetaFunctionResul
     Returns:
         MetaFunctionResult indicating whether to use this proc macro
     """
-    # Check if the latex contains num(...) patterns
-    has_num = bool(re.search(r'\\?num\s*\(', input_data.latex))
+    # Check if the latex contains n(...) patterns
+    has_num = bool(re.search(r'\\?n\s*(?:\\left)?\(', input_data.latex))
 
     return MetaFunctionResult(
         index=5,  # Priority order (lower runs first)
         name="Evaluate num() Functions",
         use_result=has_num
     )
+
 
